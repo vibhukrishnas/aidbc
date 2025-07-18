@@ -1,0 +1,27 @@
+﻿# Multi-stage build for React client
+FROM node:18-alpine AS client-build
+
+WORKDIR /app/client
+COPY client/package*.json ./
+RUN npm ci --only=production
+
+COPY client/ ./
+RUN npm run build
+
+# Node.js server
+FROM node:18-alpine AS server
+
+WORKDIR /app
+COPY server/package*.json ./
+RUN npm ci --only=production
+
+COPY server/ ./
+COPY --from=client-build /app/client/build ./public
+
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:5000/health || exit 1
+
+CMD ["node", "src/app.js"]

@@ -1,0 +1,20 @@
+﻿{
+  "name": "debate-coach-ai",
+  "version": "1.0.0",
+  "description": "AI-powered debate coaching platform with gamification",
+  "main": "index.js",
+  "scripts": {
+    "dev:client": "cd client && npm start",
+    "dev:server": "cd server && npm run dev",
+    "dev:all": "concurrently \"npm:dev:client\" \"npm:dev:server\"",
+    "build": "cd client && npm run build",
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "cd client && npm test",
+    "test:server": "cd server && npm test",
+    "setup": "./scripts/setup.sh",
+    "deploy": "./deployment/scripts/deploy.sh"
+  },
+  "workspaces": ["client", "server", "ai-engine"],
+  "keywords": ["ai", "debate", "education", "gamification", "sarvam-ai"],
+  "license": "MIT"
+}
