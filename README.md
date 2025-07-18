@@ -1,4 +1,4 @@
-﻿#  AI Debate Coach - Championship Edition
+﻿#  AI Debate Coach
 
 > **Empowering the next generation of debaters through AI-powered coaching and gamified learning**
 
