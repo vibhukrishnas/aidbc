@@ -1,7 +1,18 @@
 ﻿#!/bin/bash
 
-echo ' AI Debate Coach - Championship Setup'
+echo '🏆 AI Debate Coach - Championship Setup'
 echo '======================================='
+
+# Check Node.js versioncho ' AI Debate Coach - Championship Setup'
+ec# Sarvam AI setup instructions
+echo '🤖 Sarvam AI Setup:'
+echo '✅ API key already configured in .env file'
+echo '🔗 Dashboard: https://www.sarvam.ai/'
+echo ''
+
+echo '✅ Setup complete! Next steps:'
+echo '1. Start MongoDB service'
+echo '2. Run: npm run dev:all'=================================='
 
 # Check Node.js version
 if ! command -v node &> /dev/null; then
