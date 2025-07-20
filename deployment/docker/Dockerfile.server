@@ -1,27 +1,56 @@
-﻿# Multi-stage build for React client
-FROM node:18-alpine AS client-build
-
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm ci --only=production
-
-COPY client/ ./
-RUN npm run build
-
-# Node.js server
-FROM node:18-alpine AS server
+﻿# Build stage
+FROM node:16-alpine AS builder
 
 WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
+# Copy package files
 COPY server/package*.json ./
-RUN npm ci --only=production
 
-COPY server/ ./
-COPY --from=client-build /app/client/build ./public
+# Install all dependencies
+RUN npm ci
 
-EXPOSE 5000
+# Copy source code
+COPY server/ .
+
+# Production stage
+FROM node:16-alpine
+
+WORKDIR /app
+
+# Install production dependencies
+RUN apk add --no-cache tini
+
+# Copy package files
+COPY server/package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built application
+COPY --from=builder /app .
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Change ownership
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
+  CMD node -e "require('http').get('http://localhost:3001/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
 
+# Use tini as entrypoint
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start the application
 CMD ["node", "src/app.js"]

@@ -8,29 +8,34 @@ const Button = ({
   disabled = false,
   loading = false,
   onClick,
+  fullWidth = false,
+  icon,
   ...props 
 }) => {
-  const classes = [
+  const classNames = [
     'btn',
-    tn-${variant},
-    tn-${size},
-    disabled && 'btn-disabled',
-    loading && 'btn-loading'
+    `btn-${variant}`,
+    `btn-${size}`,
+    fullWidth && 'btn-full-width',
+    loading && 'btn-loading',
+    disabled && 'btn-disabled'
   ].filter(Boolean).join(' ');
 
   return (
-    <button 
-      className={classes}
+    <button
+      className={classNames}
       disabled={disabled || loading}
       onClick={onClick}
       {...props}
     >
       {loading ? (
+        <span className="btn-spinner" />
+      ) : (
         <>
-          <span className="spinner"></span>
-          Loading...
+          {icon && <span className="btn-icon">{icon}</span>}
+          {children}
         </>
-      ) : children}
+      )}
     </button>
   );
 };

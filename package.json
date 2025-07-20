@@ -1,20 +1,80 @@
 ﻿{
   "name": "debate-coach-ai",
   "version": "1.0.0",
-  "description": "AI-powered debate coaching platform with gamification",
-  "main": "index.js",
+  "description": "AI-powered accessible debate coaching platform",
+  "main": "server/src/app.js",
   "scripts": {
-    "dev:client": "cd client && npm start",
+    "start": "node server/src/scripts/start.js",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",
-    "dev:all": "concurrently \"npm:dev:client\" \"npm:dev:server\"",
-    "build": "cd client && npm run build",
-    "test": "npm run test:client && npm run test:server",
-    "test:client": "cd client && npm test",
+    "dev:client": "cd client && npm start",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "test": "npm run test:server && npm run test:client",
     "test:server": "cd server && npm test",
-    "setup": "./scripts/setup.sh",
-    "deploy": "./deployment/scripts/deploy.sh"
+    "test:client": "cd client && npm test",
+    "test:coverage": "npm run test:server -- --coverage && npm run test:client -- --coverage",
+    "lint": "npm run lint:server && npm run lint:client",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "format": "npm run format:server && npm run format:client",
+    "format:server": "cd server && npm run format",
+    "format:client": "cd client && npm run format",
+    "setup": "chmod +x scripts/setup.sh && ./scripts/setup.sh",
+    "docker:build": "docker-compose -f deployment/docker/docker-compose.yml build",
+    "docker:up": "docker-compose -f deployment/docker/docker-compose.yml up",
+    "docker:down": "docker-compose -f deployment/docker/docker-compose.yml down",
+    "deploy:staging": "./deployment/scripts/deploy.sh staging deploy",
+    "deploy:production": "./deployment/scripts/deploy.sh production deploy",
+    "health-check": "./deployment/scripts/health-check.sh",
+    "generate-report": "node analytics/scripts/data-aggregator.js",
+    "seed-data": "node server/scripts/seed-data.js",
+    "migrate": "node server/scripts/migrate.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js"
   },
-  "workspaces": ["client", "server", "ai-engine"],
-  "keywords": ["ai", "debate", "education", "gamification", "sarvam-ai"],
-  "license": "MIT"
+  "keywords": [
+    "debate",
+    "education",
+    "ai",
+    "accessibility",
+    "multilingual",
+    "sarvam",
+    "inclusive",
+    "hackathon"
+  ],
+  "author": "Your Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/debate-coach-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/debate-coach-ai/issues"
+  },
+  "homepage": "https://github.com/your-username/debate-coach-ai#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npm run lint",
+      "npm run format"
+    ]
+  }
 }

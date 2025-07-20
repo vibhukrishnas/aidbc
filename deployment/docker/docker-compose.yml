@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - debate-network
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.server
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/debate-coach
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - ../../.env
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - debate-network
+    restart: unless-stopped
+    volumes:
+      - uploads:/app/uploads
+
+  mongodb:
+    image: mongo:5
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secretpassword
+      - MONGO_INITDB_DATABASE=debate-coach
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - debate-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - debate-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx-ssl.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - client
+      - server
+    networks:
+      - debate-network
+    restart: unless-stopped
+
+networks:
+  debate-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:
+  uploads:

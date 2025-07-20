@@ -1,73 +1,128 @@
-﻿import React, { useState, useEffect } from 'react';
-import { useDebate } from '../../hooks/useDebate';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useSarvamAI } from '../../hooks/useSarvamAI';
-import Button from '../core/Button';
-import Card from '../core/Card';
+import { useDebate } from '../../hooks/useDebate';
+import { useGameification } from '../../hooks/useGameification';
+import SpeechInput from './SpeechInput';
+import Timer from './Timer';
+import FeedbackDisplay from './FeedbackDisplay';
+import PowerUpBar from '../gamification/PowerUpBar';
 import './DebateArena.css';
 
-const DebateArena = ({ topic, participants }) => {
-  const { debate, startDebate, submitArgument, endDebate } = useDebate();
-  const { analyzeArgument, generateFeedback } = useSarvamAI();
-  const [currentArgument, setCurrentArgument] = useState('');
+const DebateArena = ({ topic }) => {
+  const [userInput, setUserInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  
+  const { generateFeedback, isLoading } = useSarvamAI();
+  const { submitDebate, currentDebate } = useDebate();
+  const { addXP, checkAchievements, triggerCombo } = useGameification();
+  
+  const textareaRef = useRef(null);
 
-  const handleSubmitArgument = async () => {
-    if (!currentArgument.trim()) return;
+  // Auto-save draft
+  useEffect(() => {
+    const saveTimer = setTimeout(() => {
+      if (userInput) {
+        localStorage.setItem('debate-draft', userInput);
+      }
+    }, 1000);
+    
+    return () => clearTimeout(saveTimer);
+  }, [userInput]);
 
-    // Submit argument to debate system
-    const argument = await submitArgument({
-      content: currentArgument,
-      participant: participants[0], // Current user
-      timestamp: Date.now()
-    });
+  const handleSubmit = async () => {
+    if (userInput.trim().length < 50) {
+      alert('Please provide at least 50 characters for your argument.');
+      return;
+    }
 
-    // Get AI analysis using Sarvam AI
-    const analysis = await analyzeArgument(currentArgument);
-    const feedback = await generateFeedback(analysis);
+    try {
+      const feedback = await generateFeedback(userInput, topic.id);
+      const result = await submitDebate({
+        topicId: topic.id,
+        response: userInput,
+        feedback
+      });
 
-    setCurrentArgument('');
+      // Gamification rewards
+      const xpEarned = Math.floor(feedback.overallScore * 0.5);
+      addXP(xpEarned);
+      
+      if (feedback.overallScore > 80) {
+        triggerCombo();
+      }
+      
+      checkAchievements();
+      setShowFeedback(true);
+      
+      // Clear draft
+      localStorage.removeItem('debate-draft');
+    } catch (error) {
+      console.error('Error submitting debate:', error);
+    }
+  };
+
+  const handleSpeechResult = (transcript) => {
+    setUserInput(prev => prev + ' ' + transcript);
   };
 
   return (
     <div className="debate-arena">
-      <Card title={Debate: ${topic}} variant="primary" elevated>
-        <div className="debate-content">
-          <div className="debate-timeline">
-            {debate.arguments?.map((arg, index) => (
-              <div key={index} className="argument-bubble">
-                <div className="argument-content">{arg.content}</div>
-                <div className="argument-meta">
-                  {arg.participant.name}  {new Date(arg.timestamp).toLocaleTimeString()}
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="debate-header">
+        <h2>{topic.title}</h2>
+        <Timer />
+      </div>
 
-          <div className="debate-input">
-            <textarea
-              value={currentArgument}
-              onChange={(e) => setCurrentArgument(e.target.value)}
-              placeholder="Present your argument..."
-              className="argument-textarea"
+      <PowerUpBar />
+
+      <div className="debate-content">
+        <div className="debate-prompt">
+          <p>{topic.description}</p>
+          <div className="debate-tips">
+            💡 Tip: Structure your argument with clear points and evidence
+          </div>
+        </div>
+
+        <div className="debate-input-section">
+          <textarea
+            ref={textareaRef}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            placeholder="Present your argument here..."
+            className="debate-textarea"
+            maxLength={2000}
+          />
+          
+          <div className="input-controls">
+            <SpeechInput 
+              onResult={handleSpeechResult}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
             />
-            <div className="debate-controls">
-              <Button
-                variant="secondary"
-                onClick={() => setIsRecording(!isRecording)}
-              >
-                {isRecording ? ' Stop Recording' : ' Voice Input'}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleSubmitArgument}
-                disabled={!currentArgument.trim()}
-              >
-                Submit Argument
-              </Button>
+            
+            <div className="char-count">
+              {userInput.length} / 2000
             </div>
           </div>
         </div>
-      </Card>
+
+        <div className="debate-actions">
+          <button 
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={isLoading || userInput.trim().length < 50}
+          >
+            {isLoading ? 'Analyzing...' : 'Submit Argument'}
+          </button>
+        </div>
+      </div>
+
+      {showFeedback && currentDebate?.feedback && (
+        <FeedbackDisplay 
+          feedback={currentDebate.feedback}
+          onClose={() => setShowFeedback(false)}
+        />
+      )}
     </div>
   );
 };

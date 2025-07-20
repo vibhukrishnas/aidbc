@@ -1,0 +1,25 @@
+{
+  "short_name": "Debate Coach",
+  "name": "AI Debate Coach",
+  "description": "Accessible debate education powered by AI",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "categories": ["education", "accessibility"],
+  "lang": "en-IN",
+  "dir": "ltr",
+  "orientation": "portrait"
+}
