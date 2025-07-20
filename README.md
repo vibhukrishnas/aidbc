@@ -110,14 +110,6 @@ docker-compose up
 - **Content Moderation** - Review and approve content
 - **System Health** - Monitor performance and uptime
 
-## 🎯 Impact Metrics
-
-- **12,450+** Students with disabilities reached
-- **245** Schools using the platform
-- **67%** Average skill improvement
-- **10** Languages supported
-- **98%** Accessibility compliance score
-
 ## 🛠️ Development
 
 ### Setup Development Environment
