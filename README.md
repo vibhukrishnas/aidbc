@@ -77,9 +77,7 @@ debate-coach-ai/
 |----------|----------|-------------|---------|
 | `SARVAM_API_KEY` | ✅ | Sarvam AI API key | `sk-xxx...` |
 | `JWT_SECRET` | ✅ | JWT signing secret | `random-32-char-string` |
-| `MONGODB_URI` | ✅ | MongoDB connection | `mongodb://localhost:27017/debate-coach` |
-| `REDIS_URL` | ❌ | Redis cache URL | `redis://localhost:6379` |
-| `PORT` | ❌ | Server port | `3001` |
+| `MONGODB_URI` | ✅ | MongoDB connection | `mongodb://localhost:27017/debate-coach` 
 
 ## 🐳 Docker Deployment
 
@@ -237,9 +235,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Documentation**: [docs/](docs/)
 - **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
-- **Email**: support@debate-coach.ai
-- **Discord**: [Join our community](https://discord.gg/debate-coach)
-
+- **Email**: vibhukrishnas7@gmail.com
 ---
 
 **Built with ❤️ for accessible education**
